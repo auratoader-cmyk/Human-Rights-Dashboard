@@ -24,10 +24,25 @@ def get_company_ids(uploaded_file):
     if uploaded_file is None:
         return []
     df = pd.read_csv(uploaded_file, header=None)
-    return df.iloc[:, 0].astype(str).tolist()
+    # Standardize: strip spaces and uppercase
+    return df.iloc[:, 0].astype(str).str.strip().str.upper().tolist()
+
+# Standardize ISSUERID in both dataframes
+chart1_data["ISSUERID"] = chart1_data["ISSUERID"].astype(str).str.strip().str.upper()
+chart2_data["ISSUERID"] = chart2_data["ISSUERID"].astype(str).str.strip().str.upper()
 
 portfolio_ids = get_company_ids(portfolio_file)
 benchmark_ids = get_company_ids(benchmark_file)
+
+# --- Debugging Info ---
+# Remove display of Portfolio IDs and Benchmark IDs
+# st.write("Portfolio IDs:", portfolio_ids)
+# st.write("Benchmark IDs:", benchmark_ids)
+# st.write("Sample ISSUERIDs:", chart1_data["ISSUERID"].unique()[:10])
+
+# Keep only the row counts
+st.write("Portfolio rows:", len(chart1_data[chart1_data["ISSUERID"].isin(portfolio_ids)]))
+st.write("Benchmark rows:", len(chart1_data[chart1_data["ISSUERID"].isin(benchmark_ids)]))
 
 # --- Chart 1: Impact Materiality Assessment ---
 with col1:
@@ -43,8 +58,8 @@ with col1:
     )
 
     if portfolio_ids and benchmark_ids:
-        portfolio_df = chart1_data[chart1_data["ISSUERID"].astype(str).isin(portfolio_ids)]
-        benchmark_df = chart1_data[chart1_data["ISSUERID"].astype(str).isin(benchmark_ids)]
+        portfolio_df = chart1_data[chart1_data["ISSUERID"].isin(portfolio_ids)]
+        benchmark_df = chart1_data[chart1_data["ISSUERID"].isin(benchmark_ids)]
 
         def percent_one(df, col):
             valid = df[col].dropna().astype(str).str.strip()
@@ -89,8 +104,8 @@ with col2:
     ]
 
     if portfolio_ids and benchmark_ids:
-        portfolio_df2 = chart2_data[chart2_data["ISSUERID"].astype(str).isin(portfolio_ids)]
-        benchmark_df2 = chart2_data[chart2_data["ISSUERID"].astype(str).isin(benchmark_ids)]
+        portfolio_df2 = chart2_data[chart2_data["ISSUERID"].isin(portfolio_ids)]
+        benchmark_df2 = chart2_data[chart2_data["ISSUERID"].isin(benchmark_ids)]
 
         def percent_yes(df, col):
             valid = df[col].dropna().astype(str).str.strip()
@@ -114,7 +129,7 @@ with col2:
 
         ax.set_ylabel('Human Rights Practices', fontsize=80)
         ax.set_xlabel("Percentage of Companies with 'Yes'", fontsize=80)
-        ax.set_title("Comparison of Practices: Portfolio vs Benchmark", fontsize=80, pad=160)  # Good gap below title
+        ax.set_title("Comparison of Practices: Portfolio vs Benchmark", fontsize=80, pad=190)  # Good gap below title
         ax.set_yticks(y)
 
         practice_labels = [
