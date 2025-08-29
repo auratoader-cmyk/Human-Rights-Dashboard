@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Human Rights Dashboard</title>
+</head>
+<body>
+  <h1>Human Rights Comparison</h1>
+  <div id="results"></div>
+  <script>
+    fetch('/data')
+      .then(response => response.json())
+      .then(data => {
+        const div = document.getElementById('results');
+        div.innerHTML = '<table border="1"><tr><th>Practice</th><th>ACWI</th><th>SRI</th></tr>' +
+          data.map(row => `<tr><td>${row.practice}</td><td>${row.acwi}</td><td>${row.sri}</td></tr>`).join('') +
+          '</table>';
+      });
+  </script>
+</body>
+</html>
